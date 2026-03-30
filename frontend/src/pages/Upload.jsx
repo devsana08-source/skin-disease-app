@@ -55,7 +55,7 @@ const Upload = () => {
         },
       };
 
-      const { data } = await axios.post('/api/upload', formData, config);
+      const { data } = await axios.post('https://skin-this-app-m3qr.onrender.com/api/upload', formData, config);
       navigate('/result', { state: { resultData: data } });
     } catch (err) {
       setError(err.response?.data?.message || 'Error uploading image');

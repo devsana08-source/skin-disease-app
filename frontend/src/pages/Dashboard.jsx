@@ -16,7 +16,7 @@ const Dashboard = () => {
         const config = {
           headers: { Authorization: `Bearer ${user.token}` }
         };
-        const { data } = await axios.get('/api/history', config);
+        const { data } = await axios.get('https://skin-this-app-m3qr.onrender.com/api/history', config);
         setHistory(data);
       } catch (error) {
         console.error('Error fetching history:', error);
@@ -33,7 +33,7 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this scan?')) {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await axios.delete(`/api/history/${id}`, config);
+        await axios.delete(`https://skin-this-app-m3qr.onrender.com/api/history/${id}`, config);
         setHistory(history.filter((item) => item._id !== id));
       } catch (error) {
         console.error('Error deleting history:', error);
