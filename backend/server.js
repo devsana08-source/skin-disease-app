@@ -1,14 +1,15 @@
 const fs = require('fs');
+const path = require('path');
 
-// Ensure uploads folder exists before multer setup
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 // Direct /predict upload route for compatibility
 const multer = require('multer');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
