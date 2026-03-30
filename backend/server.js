@@ -1,3 +1,23 @@
+const fs = require('fs');
+
+// Ensure uploads folder exists before multer setup
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
+// Direct /predict upload route for compatibility
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage });
+app.post('/predict', upload.single('image'), (req, res) => {
+  res.json({ message: 'Image uploaded successfully' });
+});
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -9,7 +29,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://skin-this-app-m3qr.vercel.app"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads')); // For local fallback
