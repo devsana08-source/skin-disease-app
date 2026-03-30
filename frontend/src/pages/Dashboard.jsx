@@ -86,7 +86,7 @@ const Dashboard = () => {
           <div className="history-list">
             {recentUploads.map((item) => (
               <div key={item._id} className="glass-card history-item" style={{ position: 'relative' }}>
-                <img src={`http://localhost:5000${item.imageUrl}`} alt="Scan" className="history-thumb" />
+                <img src={`https://skin-this-app-m3qr.onrender.com${item.imageUrl}`} alt="Scan" className="history-thumb" />
                 <div className="history-details" style={{ flexGrow: 1 }}>
                   <h4>{item.predictionLabel}</h4>
                   <p className="history-date">{new Date(item.createdAt).toLocaleDateString()}</p>

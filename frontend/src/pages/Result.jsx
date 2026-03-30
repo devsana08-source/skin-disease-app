@@ -33,7 +33,7 @@ const Result = () => {
 
       <div className="result-content">
         <div className="glass-panel image-section">
-          <img src={`http://localhost:5000${imageUrl}`} alt="Uploaded Skin" className="result-img" />
+          <img src={`https://skin-this-app-m3qr.onrender.com${imageUrl}`} alt="Uploaded Skin" className="result-img" />
           
           <div className="result-actions image-actions">
             <Link to="/dashboard" className="btn btn-secondary">Dashboard</Link>

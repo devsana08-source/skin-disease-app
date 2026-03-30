@@ -85,7 +85,7 @@ const History = () => {
           {history.map((item) => (
             <div key={item._id} className="glass-card history-card" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => handleCardClick(item)}>
               <div className="history-card-img" style={{ position: 'relative' }}>
-                <img src={`http://localhost:5000${item.imageUrl}`} alt="Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={`https://skin-this-app-m3qr.onrender.com${item.imageUrl}`} alt="Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 {item.warning && (
                   <div className="warning-badge" style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <AlertTriangle size={12} /> Low Conf
