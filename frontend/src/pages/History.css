@@ -1,0 +1,81 @@
+.history-page {
+  padding-top: 40px;
+}
+
+.history-header {
+  margin-bottom: 40px;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.history-card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-card-img {
+  height: 180px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.history-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.history-card-info {
+  padding: 20px;
+}
+
+.history-card-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.history-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conf-badge {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--secondary);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.date-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 20px;
+  color: var(--primary);
+}
+
+.empty-history {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
