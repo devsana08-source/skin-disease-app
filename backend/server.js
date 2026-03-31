@@ -32,12 +32,23 @@ const upload = multer({ storage: storage });
 
 // Middleware
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://skin-disease-app-m3qr.vercel.app",
-    "https://skin-disease-app-m3qr.onrender.com"
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://skin-disease-app.vercel.app',
+      'https://skin-disease-app-m3qr.vercel.app',
+      'https://skin-disease-app-m3qr.onrender.com',
+    ];
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS: Origin not allowed — ' + origin));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
