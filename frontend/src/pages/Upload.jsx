@@ -55,7 +55,7 @@ const Upload = () => {
         withCredentials: true
       };
 
-      const { data } = await axios.post('https://skin-this-app-m3qr.onrender.com/predict', formData, config);
+      const { data } = await axios.post('https://skin-disease-app-m3qr.onrender.com/predict', formData, config);
       navigate('/result', { state: { resultData: data } });
     } catch (err) {
       setError(err.response?.data?.message || 'Error uploading image');
