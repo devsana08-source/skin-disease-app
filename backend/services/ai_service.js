@@ -1,87 +1,95 @@
-const { spawn } = require('child_process');
+const tf = require('@tensorflow/tfjs');
+const sharp = require('sharp');
 const path = require('path');
+const fs = require('fs');
 
-// Try multiple Python commands to find one that works
-const PYTHON_COMMANDS = [
-  ['py', ['-3.10']],
-  ['py', ['-3']],
-  ['python', []],
-  ['python3', []],
+const CLASS_NAMES = [
+  'Acne',
+  'Actinic_Keratosis',
+  'Benign_tumors',
+  'Bullous',
+  'Candidiasis',
+  'DrugEruption',
+  'Eczema',
+  'Infestations_Bites',
+  'Lichen',
+  'Lupus',
+  'Moles',
+  'Psoriasis',
+  'Rosacea',
+  'Seborrh_Keratoses',
+  'SkinCancer',
+  'Sun_Sunlight_Damage',
+  'Tinea',
+  'Unknown_Normal',
+  'Vascular_Tumors',
+  'Vasculitis',
+  'Vitiligo',
+  'Warts',
 ];
 
-const predictSkinDisease = (imagePath) => {
-  return new Promise((resolve, reject) => {
-    const pyScriptPath = path.join(__dirname, '../models/inference.py');
+let model = null;
+const MODEL_JSON_PATH = path.join(__dirname, '../models/tfjs_model/model.json');
 
-    let commandIndex = 0;
+// Load model once and cache it (warm up on first request)
+async function loadModel() {
+  if (model) return model;
 
-    const tryNextCommand = () => {
-      if (commandIndex >= PYTHON_COMMANDS.length) {
-        return reject(new Error('Python is not installed or could not be found. Please install Python 3.8+ and ensure it is in your PATH.'));
-      }
+  console.log('[AI Service] Loading TF.js model from:', MODEL_JSON_PATH);
 
-      const [cmd, extraArgs] = PYTHON_COMMANDS[commandIndex++];
-      const args = [...extraArgs, pyScriptPath, imagePath];
+  if (!fs.existsSync(MODEL_JSON_PATH)) {
+    throw new Error(
+      'TF.js model not found. Expected: ' + MODEL_JSON_PATH
+    );
+  }
 
-      const pythonProcess = spawn(cmd, args);
+  // Use file:// scheme for local filesystem loading
+  const modelUrl = 'file://' + MODEL_JSON_PATH.replace(/\\/g, '/');
+  model = await tf.loadLayersModel(modelUrl);
+  console.log('[AI Service] Model loaded and cached successfully');
+  return model;
+}
 
-      let outputData = '';
-      let errorData = '';
+async function predictSkinDisease(imagePath) {
+  // Load and preprocess image using sharp
+  const imageBuffer = await sharp(imagePath)
+    .resize(224, 224)
+    .removeAlpha()
+    .raw()
+    .toBuffer();
 
-      pythonProcess.stdout.on('data', (data) => {
-        outputData += data.toString();
-      });
+  // Convert buffer to float32 tensor normalized to [0, 1]
+  const floatArray = new Float32Array(imageBuffer.length);
+  for (let i = 0; i < imageBuffer.length; i++) {
+    floatArray[i] = imageBuffer[i] / 255.0;
+  }
 
-      pythonProcess.stderr.on('data', (data) => {
-        errorData += data.toString();
-      });
+  const tensor = tf.tensor4d(floatArray, [1, 224, 224, 3]);
 
-      pythonProcess.on('error', (err) => {
-        // This command not found, try next
-        tryNextCommand();
-      });
+  // Run inference
+  const loadedModel = await loadModel();
+  const predictions = loadedModel.predict(tensor);
+  const predArray = await predictions.data();
 
-      pythonProcess.on('close', (code) => {
-        clearTimeout(timeout);
+  // Cleanup tensors to avoid memory leaks
+  tensor.dispose();
+  predictions.dispose();
 
-        // Find JSON block in outputData
-        const jsonMatch = outputData.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            const result = JSON.parse(jsonMatch[0]);
-            if (result.error) return reject(new Error(result.error));
-            if (code === 0) return resolve(result);
-          } catch (e) {}
-        }
+  // Rank all predictions by confidence
+  const indexed = Array.from(predArray).map((conf, i) => ({
+    label: CLASS_NAMES[i] || `Class_${i}`,
+    confidence: Math.round(conf * 10000) / 100,
+  }));
+  indexed.sort((a, b) => b.confidence - a.confidence);
 
-        if (code !== 0) {
-          console.error(`Python Script Failed with command '${cmd}'. Exit Code:`, code);
-          console.error('Raw Stderr:', errorData);
+  const top4 = indexed.slice(0, 4);
+  const best = top4[0];
 
-          const errorLines = errorData.trim().split('\n').filter(line => line.trim() !== '');
-          let lastError = 'Check backend terminal for full logs';
-          for (let i = errorLines.length - 1; i >= 0; i--) {
-            if (!errorLines[i].includes('WARNING:tensorflow')) {
-              lastError = errorLines[i];
-              break;
-            }
-          }
+  return {
+    prediction: best.label,
+    confidence: best.confidence,
+    top_predictions: top4,
+  };
+}
 
-          return reject(new Error(`Python Crash [Code ${code}]: ${lastError}`));
-        }
-      });
-
-      // Timeout protection for ML script
-      const timeout = setTimeout(() => {
-        pythonProcess.kill();
-        reject(new Error('ML Inference timed out (took over 90 seconds). The AI model load is taking too long on your CPU - please try again.'));
-      }, 90000);
-    };
-
-    tryNextCommand();
-  });
-};
-
-module.exports = {
-  predictSkinDisease
-};
+module.exports = { predictSkinDisease };
