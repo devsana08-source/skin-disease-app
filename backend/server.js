@@ -64,8 +64,8 @@ mongoose.connect(MONGODB_URI)
 // Routes
 // ========================
 
-// Direct /predict upload route
-app.post('/predict', protect, upload.single('image'), async (req, res) => {
+// Direct /predict upload route (no auth required)
+app.post('/predict', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -78,31 +78,22 @@ app.post('/predict', protect, upload.single('image'), async (req, res) => {
     try {
       predictionResult = await predictSkinDisease(req.file.path);
     } catch (aiError) {
-      return res.status(400).json({ message: aiError.message });
-    }
-
-    let historyRecord = null;
-    if (req.user) {
-      historyRecord = await History.create({
-        user: req.user._id,
-        imageUrl,
-        predictionLabel: predictionResult.prediction,
-        confidenceScore: predictionResult.confidence,
-      });
+      console.error('AI Service Error:', aiError);
+      return res.status(400).json({ message: aiError.message || 'Prediction failed' });
     }
 
     res.json({
       success: true,
-      message: 'Image uploaded successfully',
+      message: 'Image uploaded and analyzed successfully',
       imageUrl,
       prediction: predictionResult,
-      historyId: historyRecord?._id || null,
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('Upload Error:', error);
     res.status(500).json({
       error: 'Upload failed',
+      details: error.message,
     });
   }
 });
