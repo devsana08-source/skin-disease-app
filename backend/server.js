@@ -31,7 +31,8 @@ const upload = multer({ storage: storage });
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://skin-this-app-m3qr.vercel.app"
+    "https://skin-disease-app-m3qr.vercel.app",
+    "https://skin-disease-app-m3qr.onrender.com"
   ],
   credentials: true
 }));
