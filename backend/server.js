@@ -11,14 +11,21 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Ensure uploads folder exists
-const uploadDir = 'uploads/';
+const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer setup
-const upload = multer({ dest: uploadDir });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  },
+});
+const upload = multer({ storage: storage });
 
 // Middleware
 app.use(cors({
@@ -57,17 +64,22 @@ mongoose.connect(MONGODB_URI)
 app.post('/predict', upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No image uploaded" });
+      return res.status(400).json({
+        error: 'No image uploaded',
+      });
     }
 
     res.json({
-      message: "Image uploaded successfully",
-      file: req.file
+      success: true,
+      message: 'Image uploaded successfully',
+      file: req.file.filename,
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Upload failed" });
+    res.status(500).json({
+      error: 'Upload failed',
+    });
   }
 });
 
