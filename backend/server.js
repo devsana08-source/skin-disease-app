@@ -5,6 +5,9 @@ const dotenv = require('dotenv');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { protect } = require('./routes/history');
+const { predictSkinDisease } = require('./services/ai_service');
+const History = require('./models/History');
 
 dotenv.config();
 
@@ -62,7 +65,7 @@ mongoose.connect(MONGODB_URI)
 // ========================
 
 // Direct /predict upload route
-app.post('/predict', upload.single('image'), (req, res) => {
+app.post('/predict', protect, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -70,10 +73,30 @@ app.post('/predict', upload.single('image'), (req, res) => {
       });
     }
 
+    const imageUrl = `/uploads/${req.file.filename}`;
+    let predictionResult;
+    try {
+      predictionResult = await predictSkinDisease(req.file.path);
+    } catch (aiError) {
+      return res.status(400).json({ message: aiError.message });
+    }
+
+    let historyRecord = null;
+    if (req.user) {
+      historyRecord = await History.create({
+        user: req.user._id,
+        imageUrl,
+        predictionLabel: predictionResult.prediction,
+        confidenceScore: predictionResult.confidence,
+      });
+    }
+
     res.json({
       success: true,
       message: 'Image uploaded successfully',
-      file: req.file.filename,
+      imageUrl,
+      prediction: predictionResult,
+      historyId: historyRecord?._id || null,
     });
 
   } catch (error) {

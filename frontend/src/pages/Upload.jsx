@@ -48,10 +48,15 @@ const Upload = () => {
     formData.append('image', file);
 
     try {
+      const headers = {
+        'Content-Type': 'multipart/form-data'
+      };
+      if (user?.token) {
+        headers.Authorization = `Bearer ${user.token}`;
+      }
+
       const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
+        headers,
         withCredentials: true
       };
 
