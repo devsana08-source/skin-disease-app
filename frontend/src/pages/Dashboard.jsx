@@ -16,7 +16,7 @@ const Dashboard = () => {
         const config = {
           headers: { Authorization: `Bearer ${user.token}` }
         };
-        const { data } = await axios.get('https://skin-this-app-m3qr.onrender.com/api/history', config);
+        const { data } = await axios.get('/api/history', config);
         setHistory(data);
       } catch (error) {
         console.error('Error fetching history:', error);
@@ -33,7 +33,7 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this scan?')) {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await axios.delete(`https://skin-this-app-m3qr.onrender.com/api/history/${id}`, config);
+        await axios.delete(`/api/history/${id}`, config);
         setHistory(history.filter((item) => item._id !== id));
       } catch (error) {
         console.error('Error deleting history:', error);
@@ -86,7 +86,7 @@ const Dashboard = () => {
           <div className="history-list">
             {recentUploads.map((item) => (
               <div key={item._id} className="glass-card history-item" style={{ position: 'relative' }}>
-                <img src={`https://skin-this-app-m3qr.onrender.com${item.imageUrl}`} alt="Scan" className="history-thumb" />
+                <img src={`https://skin-disease-app-m3qr.onrender.com${item.imageUrl}`} alt="Scan" className="history-thumb" />
                 <div className="history-details" style={{ flexGrow: 1 }}>
                   <h4>{item.predictionLabel}</h4>
                   <p className="history-date">{new Date(item.createdAt).toLocaleDateString()}</p>

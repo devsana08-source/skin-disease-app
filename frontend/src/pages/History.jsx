@@ -17,7 +17,7 @@ const History = () => {
         const config = {
           headers: { Authorization: `Bearer ${user.token}` }
         };
-        const { data } = await axios.get('https://skin-this-app-m3qr.onrender.com/api/history', config);
+        const { data } = await axios.get('/api/history', config);
         setHistory(data);
       } catch (error) {
         console.error('Error fetching history:', error);
@@ -35,7 +35,7 @@ const History = () => {
     if (window.confirm('Are you sure you want to delete this scan?')) {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await axios.delete(`https://skin-this-app-m3qr.onrender.com/api/history/${id}`, config);
+        await axios.delete(`/api/history/${id}`, config);
         setHistory(history.filter((item) => item._id !== id));
       } catch (error) {
         console.error('Error deleting history:', error);
@@ -85,7 +85,7 @@ const History = () => {
           {history.map((item) => (
             <div key={item._id} className="glass-card history-card" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => handleCardClick(item)}>
               <div className="history-card-img" style={{ position: 'relative' }}>
-                <img src={`https://skin-this-app-m3qr.onrender.com${item.imageUrl}`} alt="Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={`https://skin-disease-app-m3qr.onrender.com${item.imageUrl}`} alt="Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 {item.warning && (
                   <div className="warning-badge" style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <AlertTriangle size={12} /> Low Conf
